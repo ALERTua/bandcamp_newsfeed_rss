@@ -58,11 +58,11 @@ def generate_rss(request: Request, atom=False):
     logger.debug(f"Found {len(items)} items in the feed")
 
     fg = FeedGenerator()
-    fg.title("Bandcamp User Feed")
+    fg.title(f"Bandcamp {BANDCAMP_USERNAME} Feed")
     fg.id(URL)
-    fg.link(href=URL)
+    fg.link(href=URL, rel="source")
     fg.link(href=str(request.url), rel="self")
-    fg.description("RSS feed of my Bandcamp news feed")
+    fg.description(f"RSS feed of {BANDCAMP_USERNAME} Bandcamp news feed")
 
     for item in items:
         title = item.find("div", class_="collection-item-title").text.strip()
@@ -78,6 +78,7 @@ def generate_rss(request: Request, atom=False):
         entry.id(f"{album_link}#{id_}")
         entry.title(f"{title} by {artist}")
         entry.link(href=album_link)
+        entry.author({"name": artist})
         entry.description(f"{description} - {tags}")
 
         if release_date.lower() == "yesterday":
@@ -157,4 +158,4 @@ def get_health() -> HealthCheck:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")), log_level="info")
