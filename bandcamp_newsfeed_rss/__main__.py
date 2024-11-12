@@ -151,7 +151,7 @@ def get_health() -> HealthCheck:
         HealthCheck: Returns a JSON response with the health status
 
     """
-    logger.info("Health check endpoint accessed")
+    logger.debug("Health check endpoint accessed")
     return HealthCheck(status="OK")
 
 
