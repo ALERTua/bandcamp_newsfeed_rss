@@ -60,7 +60,7 @@ def generate_rss(request: Request, atom=False):
     fg = FeedGenerator()
     fg.title(f"Bandcamp {BANDCAMP_USERNAME} Feed")
     fg.id(URL)
-    fg.link(href=URL, rel="source")
+    fg.link(href=URL)
     fg.link(href=str(request.url), rel="self")
     fg.description(f"RSS feed of {BANDCAMP_USERNAME} Bandcamp news feed")
 
