@@ -5,6 +5,7 @@ LABEL maintainer="ALERT <alexey.rubasheff@gmail.com>"
 ENV PORT=8000
 ENV BANDCAMP_USERNAME=""
 ENV IDENTITY=""
+ENV TZ="Europe/London"
 ENV CACHE_DURATION_SECONDS=3600
 
 EXPOSE $PORT

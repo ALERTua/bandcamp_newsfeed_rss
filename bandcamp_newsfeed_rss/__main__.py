@@ -2,11 +2,12 @@ import os
 import logging
 import time
 from fastapi import FastAPI, status, Response, Request
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from curl_cffi import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 from pydantic import BaseModel
-import pendulum
 
 # noinspection PyPackageRequirements
 from dotenv import load_dotenv
@@ -37,6 +38,9 @@ logger.info(f"Logging level set to {'DEBUG' if log_level == logging.DEBUG else '
 CACHE_DURATION_SECONDS = int(os.getenv("CACHE_DURATION_SECONDS", "3600"))
 cache = {"rss": None, "atom": None}
 cache_timestamp = {"rss": 0, "atom": 0}
+
+TZ = os.getenv("TZ", "Europe/London")
+TIMEZONE = ZoneInfo(TZ)
 
 app = FastAPI()
 
@@ -82,13 +86,13 @@ def generate_rss(request: Request, atom=False):
         entry.description(f"{description} - {tags}")
 
         if release_date.lower() == "yesterday":
-            pub_date = pendulum.now().subtract(days=1)
+            pub_date = datetime.now(tz=TIMEZONE) - timedelta(days=1)
         else:
             try:
-                pub_date = pendulum.from_format(release_date, "MMM D, YYYY")
+                pub_date = datetime.strptime(release_date, "%b %d, %Y").replace(tzinfo=TIMEZONE)
             except ValueError:
                 logger.warning(f"Unexpected date format for release_date: {release_date}")
-                pub_date = pendulum.now()
+                pub_date = datetime.now(tz=TIMEZONE)
 
         entry.pubDate(pub_date)
         entry.enclosure(url=cover_image, type="image/jpeg")
@@ -136,7 +140,6 @@ async def atom_feed(request: Request):
     summary="Perform a Health Check",
     response_description="Return HTTP Status Code 200 (OK)",
     status_code=status.HTTP_200_OK,
-    response_model=HealthCheck,
 )
 def get_health() -> HealthCheck:
     """
