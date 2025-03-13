@@ -1,16 +1,16 @@
-import os
 import logging
+import os
 import time
-from fastapi import FastAPI, status, Response, Request
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from curl_cffi import requests
+
+import curl_cffi as cc
 from bs4 import BeautifulSoup
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, status, Response, Request
 from feedgen.feed import FeedGenerator
 from pydantic import BaseModel
-
-# noinspection PyPackageRequirements
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -53,7 +53,7 @@ class HealthCheck(BaseModel):
 
 def generate_rss(request: Request, atom=False):
     logger.info("Requesting Bandcamp feed")
-    response = requests.get(URL, cookies=COOKIES, impersonate="chrome", timeout=30)
+    response = cc.get(URL, cookies=COOKIES, impersonate="chrome", timeout=30)
     response.raise_for_status()
     logger.info("Received response from Bandcamp")
 
@@ -106,7 +106,7 @@ async def _rss_feed(request: Request, atom=False):
     current_time = time.time()
 
     # Check cache validity
-    if cache[feed_type] and (current_time - cache_timestamp[feed_type]) < CACHE_DURATION_SECONDS:
+    if cache.get(feed_type) and (current_time - cache_timestamp.get(feed_type, 0)) < CACHE_DURATION_SECONDS:
         logger.info(f"Returning cached {feed_type} feed")
         return Response(content=cache[feed_type], media_type="application/xml", status_code=status.HTTP_200_OK)
 
