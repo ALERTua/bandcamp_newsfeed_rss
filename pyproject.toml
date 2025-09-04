@@ -1,22 +1,23 @@
 [project]
 name = "bandcamp-newsfeed-rss"
-version = "0.1.1"
+version = "0"
 description = "FastAPI RSS Feed Generator for your Bandcamp newsfeed "
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "beautifulsoup4>=4.13.3",
-    "curl-cffi>=0.10.0",
-    "fastapi>=0.115.11",
+    "beautifulsoup4>=4.13.5",
+    "curl-cffi>=0.13.0",
+    "fastapi>=0.116.1",
     "feedgen>=1.0.0",
-    "pydantic>=2.10.6",
-    "python-dotenv>=1.0.1",
-    "tzdata>=2025.1",
-    "uvicorn>=0.34.0",
+    "pydantic>=2.11.7",
+    "python-dotenv>=1.1.1",
+    "tzdata>=2025.2",
+    "uvicorn>=0.35.0",
 ]
 
-[dependency-groups]
-dev = [
-    "pre-commit>=4.1.0",
-    "ruff>=0.9.6",
-]
+# # relying on uv tool
+#[dependency-groups]
+#dev = [
+#    "pre-commit>=4.1.0",
+#    "ruff>=0.9.6",
+#]
