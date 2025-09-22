@@ -75,15 +75,23 @@ def generate_rss(request: Request, atom=False):
         album_link = item.find("a", class_="item-link")["href"]
         cover_image = item.find("img", class_="tralbum-art-large")["src"]
         release_date = item.find("div", class_="story-date").text.strip()
-        description = item.find("div", class_="collection-item-artist").text.strip()
-        tags = ", ".join(a.text.strip() for a in item.find("div", class_="collection-item-tags").find_all("a"))
+        # description = item.find("div", class_="collection-item-artist").text.strip()
+        # tags = ", ".join(a.text.strip() for a in item.find("div", class_="collection-item-tags").find_all("a"))
 
         entry = fg.add_entry()
         entry.id(f"{album_link}#{id_}")
         entry.title(f"{title} by {artist}")
         entry.link(href=album_link)
         entry.author({"name": artist})
-        entry.description(f"{description} - {tags}")
+        # Process HTML: remove tralbum-owners div and wrap in container
+        item_copy = BeautifulSoup(str(item), "html.parser")
+        owners_div = item_copy.find("div", class_="tralbum-owners")
+        if owners_div:
+            owners_div.decompose()
+        html_content = f'<div class="collection-item-container">{item_copy}</div>'
+
+        # entry.description(f"{description} - {tags}\n{html_content}")
+        entry.description(html_content)
 
         if release_date.lower() == "yesterday":
             pub_date = datetime.now(tz=TIMEZONE) - timedelta(days=1)
