@@ -59,6 +59,7 @@ def generate_rss(request: Request, atom=False):
 
     soup = BeautifulSoup(response.content, "html.parser")
     items = soup.find_all("li", class_="story nr")
+    items = items[::-1]  # Reverse the order of items
     logger.debug(f"Found {len(items)} items in the feed")
 
     fg = FeedGenerator()
