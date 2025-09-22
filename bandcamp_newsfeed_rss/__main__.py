@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -75,7 +76,7 @@ def generate_rss(request: Request, atom=False):
         artist = item.find("a", class_="artist-name").text.strip()
         album_link = item.find("a", class_="item-link")["href"]
         cover_image = item.find("img", class_="tralbum-art-large")["src"]
-        release_date = item.find("div", class_="story-date").text.strip()
+        release_date = item.find("div", class_="story-date").text.strip().lower()
 
         entry = fg.add_entry()
         entry.id(f"{album_link}#{id_}")
@@ -100,15 +101,24 @@ def generate_rss(request: Request, atom=False):
 
         entry.description(html_content)
 
-        if release_date.lower() == "yesterday":
-            pub_date = datetime.now(tz=TIMEZONE) - timedelta(days=1)
+        now = datetime.now(tz=TIMEZONE)
+        # Parse relative dates
+        if hours_match := re.match(r"^(\d+)\s+hours?\s+ago$", release_date):
+            hours = int(hours_match.group(1))
+            pub_date = now - timedelta(hours=hours)
+        elif minutes_match := re.match(r"^(\d+)\s+minutes?\s+ago$", release_date):
+            minutes = int(minutes_match.group(1))
+            pub_date = now - timedelta(minutes=minutes)
+        elif release_date == "yesterday":
+            pub_date = now - timedelta(days=1)
         else:
             try:
                 pub_date = datetime.strptime(release_date, "%b %d, %Y").replace(tzinfo=TIMEZONE)
             except ValueError:
                 logger.warning(f"Unexpected date format for release_date: {release_date}")
-                pub_date = datetime.now(tz=TIMEZONE)
+                pub_date = now
 
+        # pub_date = pub_date.replace(hour=12, minute=0, second=0, microsecond=0)
         entry.pubDate(pub_date)
         entry.enclosure(url=cover_image, type="image/jpeg")
 
