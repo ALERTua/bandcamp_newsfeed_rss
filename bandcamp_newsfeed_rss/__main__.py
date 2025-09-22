@@ -37,7 +37,7 @@ logger.info(f"Logging level set to {'DEBUG' if log_level == logging.DEBUG else '
 # Cache duration in seconds (default 60 minutes)
 CACHE_DURATION_SECONDS = int(os.getenv("CACHE_DURATION_SECONDS", "3600"))
 cache = {"rss": None, "atom": None}
-cache_timestamp = {"rss": 0, "atom": 0}
+cache_timestamp = {"rss": 0.0, "atom": 0.0}
 
 TZ = os.getenv("TZ", "Europe/London")
 TIMEZONE = ZoneInfo(TZ)
