@@ -75,8 +75,6 @@ def generate_rss(request: Request, atom=False):
         album_link = item.find("a", class_="item-link")["href"]
         cover_image = item.find("img", class_="tralbum-art-large")["src"]
         release_date = item.find("div", class_="story-date").text.strip()
-        # description = item.find("div", class_="collection-item-artist").text.strip()
-        # tags = ", ".join(a.text.strip() for a in item.find("div", class_="collection-item-tags").find_all("a"))
 
         entry = fg.add_entry()
         entry.id(f"{album_link}#{id_}")
@@ -86,7 +84,11 @@ def generate_rss(request: Request, atom=False):
         # Process HTML: remove tralbum-owners div and wrap in container
         item_copy = BeautifulSoup(str(item), "html.parser")
 
-        remove_div_classes = ["tralbum-owners", "story-sidebar"]
+        remove_div_classes = [
+            "tralbum-owners",
+            "story-sidebar",
+            "tralbum-wrapper-collect-controls",
+        ]
         for div_class in remove_div_classes:
             div_to_remove = item_copy.find("div", class_=div_class)
             if div_to_remove:
@@ -94,7 +96,6 @@ def generate_rss(request: Request, atom=False):
 
         html_content = f'<div class="collection-item-container">{item_copy}</div>'
 
-        # entry.description(f"{description} - {tags}\n{html_content}")
         entry.description(html_content)
 
         if release_date.lower() == "yesterday":
