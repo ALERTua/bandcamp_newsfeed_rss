@@ -84,13 +84,14 @@ def generate_rss(request: Request, atom=False):
         # Process HTML: remove tralbum-owners div and wrap in container
         item_copy = BeautifulSoup(str(item), "html.parser")
 
-        remove_div_classes = [
-            "tralbum-owners",
-            "story-sidebar",
-            "tralbum-wrapper-collect-controls",
+        remove_elements_classes = [
+            ("div", "tralbum-owners"),
+            ("div", "story-sidebar"),
+            ("div", "tralbum-wrapper-collect-controls"),
+            ("span", "track_play_time"),
         ]
-        for div_class in remove_div_classes:
-            div_to_remove = item_copy.find("div", class_=div_class)
+        for div_type, div_class in remove_elements_classes:
+            div_to_remove = item_copy.find(div_type, class_=div_class)
             if div_to_remove:
                 div_to_remove.decompose()
 
