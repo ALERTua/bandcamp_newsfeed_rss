@@ -8,6 +8,12 @@ Bandcamp Newsfeed RSS Feed Generator
 
 FastAPI RSS Feed Generator for your Bandcamp newsfeed
 
+Makes RSS feed out of your https://bandcamp.com/{BANDCAMP_USERNAME}/feed, 
+so you can follow the new releases using your favorite RSS reader
+
+Bandcamp Feed vs Generated RSS
+![](media/screenshot_1.png)
+
 .env:
 ```
 PORT=8000
