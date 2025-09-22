@@ -85,9 +85,13 @@ def generate_rss(request: Request, atom=False):
         entry.author({"name": artist})
         # Process HTML: remove tralbum-owners div and wrap in container
         item_copy = BeautifulSoup(str(item), "html.parser")
-        owners_div = item_copy.find("div", class_="tralbum-owners")
-        if owners_div:
-            owners_div.decompose()
+
+        remove_div_classes = ["tralbum-owners", "story-sidebar"]
+        for div_class in remove_div_classes:
+            div_to_remove = item_copy.find("div", class_=div_class)
+            if div_to_remove:
+                div_to_remove.decompose()
+
         html_content = f'<div class="collection-item-container">{item_copy}</div>'
 
         # entry.description(f"{description} - {tags}\n{html_content}")
