@@ -7,12 +7,12 @@ requires-python = ">=3.13"
 dependencies = [
     "beautifulsoup4>=4.13.5",
     "curl-cffi>=0.13.0",
-    "fastapi>=0.116.1",
+    "fastapi>=0.117.1",
     "feedgen>=1.0.0",
-    "pydantic>=2.11.7",
+    "pydantic>=2.11.9",
     "python-dotenv>=1.1.1",
     "tzdata>=2025.2",
-    "uvicorn>=0.35.0",
+    "uvicorn>=0.36.0",
 ]
 
 # # relying on uv tool
