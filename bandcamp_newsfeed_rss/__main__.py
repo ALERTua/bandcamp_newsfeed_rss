@@ -123,7 +123,7 @@ def generate_rss(request: Request, atom=False):  # noqa: PLR0915
                 logger.warning(f"Unexpected date format for release_date: {release_date}")
                 pub_date = now
 
-        pub_date = pub_date.replace(hour=12, minute=0, second=0, microsecond=0)
+        # pub_date = pub_date.replace(hour=12, minute=0, second=0, microsecond=0)
         entry.pubDate(pub_date)
         entry.enclosure(url=cover_image, type="image/jpeg")
 
