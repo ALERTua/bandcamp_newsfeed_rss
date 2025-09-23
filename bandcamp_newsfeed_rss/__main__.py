@@ -3,6 +3,7 @@ import os
 import re
 import time
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 import curl_cffi as cc
@@ -75,11 +76,15 @@ def generate_rss(request: Request, atom=False):  # noqa: PLR0915
         id_ = item.attrs.get("data-story-tralbum-key")
         artist = item.find("a", class_="artist-name").text.strip()
         album_link = item.find("a", class_="item-link")["href"]
+        # Clean album_link by removing query parameters and fragments
+        parsed = urlparse(album_link)
+        album_link = parsed._replace(query='', fragment='').geturl()
         cover_image = item.find("img", class_="tralbum-art-large")["src"]
         release_date = item.find("div", class_="story-date").text.strip().lower()
 
         entry = fg.add_entry()
-        entry.id(f"{album_link}#{id_}")
+        # entry.id(f"{album_link}#{id_}")
+        entry.guid(album_link, permalink=True)
         entry.title(f"{title} by {artist}")
         entry.link(href=album_link)
         entry.author({"name": artist})
