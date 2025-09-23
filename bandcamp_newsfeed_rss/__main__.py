@@ -78,7 +78,7 @@ def generate_rss(request: Request, atom=False):  # noqa: PLR0915
         album_link = item.find("a", class_="item-link")["href"]
         # Clean album_link by removing query parameters and fragments
         parsed = urlparse(album_link)
-        album_link = parsed._replace(query='', fragment='').geturl()
+        album_link = parsed._replace(query="", fragment="").geturl()
         cover_image = item.find("img", class_="tralbum-art-large")["src"]
         release_date = item.find("div", class_="story-date").text.strip().lower()
 
