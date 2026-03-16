@@ -3,7 +3,7 @@ import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status, Response, Request
-from pydantic import BaseModel
+from .models import HealthCheck
 import uvicorn
 
 from .config import (
@@ -69,12 +69,6 @@ async def _rss_feed(request: Request, atom: bool = False):  # noqa: FBT001
     logger.info(f"Generated new {feed_type} feed and updated cache")
 
     return Response(content=rss_content, media_type="application/xml", status_code=status.HTTP_200_OK)
-
-
-class HealthCheck(BaseModel):
-    """Response model to validate and return when performing a health check."""
-
-    status: str = "OK"
 
 
 @asynccontextmanager
