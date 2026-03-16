@@ -6,9 +6,8 @@ from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Request, Response, status
 
-from bandcamp_newsfeed_rss.cache import get_cached, set_cached
-from bandcamp_newsfeed_rss.config import logger
-from bandcamp_newsfeed_rss.generators import RSSGenerator
+from ..cache import get_cached, set_cached
+from ..generators import RSSGenerator
 
 if TYPE_CHECKING:
     from bandcamp_newsfeed_rss.sources import BandcampScrapingSource

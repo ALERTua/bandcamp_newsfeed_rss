@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from feedgen.feed import FeedGenerator
 
 if TYPE_CHECKING:
-    from .sources import FeedItem, FeedSource
+    from ..sources import FeedItem, FeedSource
 
 logger = logging.getLogger(__name__)
 
