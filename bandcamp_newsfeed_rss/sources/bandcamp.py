@@ -86,7 +86,7 @@ class BandcampScrapingSource:
                 guid=album_link,
                 enclosure_url=cover_image,
             )
-        except AttributeError, TypeError:
+        except (AttributeError, TypeError):
             return None
 
     def _parse_date(self, release_date: str) -> datetime:
