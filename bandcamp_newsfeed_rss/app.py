@@ -22,7 +22,8 @@ def create_feed_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
 
     # Include feed routers
-    scraping_router = create_feed_router(BandcampScrapingSource, prefix="")
+    scraping_source = BandcampScrapingSource()
+    scraping_router = create_feed_router(scraping_source, prefix="")
     app.include_router(scraping_router)
 
     @app.get("/health", tags=["healthcheck"])

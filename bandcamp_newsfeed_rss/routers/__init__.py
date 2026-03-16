@@ -14,14 +14,14 @@ if TYPE_CHECKING:
 
 
 def create_feed_router(
-    source_class: type[BandcampScrapingSource],
+    source: BandcampScrapingSource,
     prefix: str = "",
 ) -> APIRouter:
     """
-    Create a feed router for a given source class.
+    Create a feed router for a given source.
 
     Args:
-        source_class: The feed source class to use
+        source: The feed source instance to use
         prefix: URL prefix for the router (e.g., "/personal")
 
     Returns:
@@ -29,6 +29,7 @@ def create_feed_router(
 
     """
     router = APIRouter(prefix=prefix)
+    generator = RSSGenerator(source)
 
     async def generate_feed(request: Request, atom: bool = False) -> Response:  # noqa: FBT001
         """Generate RSS/Atom feed."""
@@ -43,10 +44,7 @@ def create_feed_router(
                 status_code=status.HTTP_200_OK,
             )
 
-        source = source_class()
-        generator = RSSGenerator(source)
         self_url = str(request.url)
-
         rss_content = await generator.generate(atom=atom, self_url=self_url)
         set_cached(feed_type, rss_content)
 
