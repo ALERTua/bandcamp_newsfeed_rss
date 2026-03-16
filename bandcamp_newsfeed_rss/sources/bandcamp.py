@@ -10,10 +10,12 @@ from curl_cffi.requests import AsyncSession
 from zoneinfo import ZoneInfo
 
 from .protocol import FeedItem
+from .registry import register_source
 
 logger = logging.getLogger(__name__)
 
 
+@register_source("scraping")
 class BandcampScrapingSource:
     """Bandcamp feed source using web scraping."""
 
@@ -104,7 +106,7 @@ class BandcampScrapingSource:
                 guid=album_link,
                 enclosure_url=cover_image,
             )
-        except (AttributeError, TypeError):
+        except AttributeError, TypeError:
             return None
 
     def _parse_date(self, release_date: str) -> datetime:
