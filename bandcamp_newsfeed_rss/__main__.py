@@ -54,16 +54,16 @@ def get_feed_source() -> BandcampScrapingSource:
     )
 
 
-def generate_rss(atom: bool = False) -> bytes:  # noqa: FBT001
+def generate_rss(request: Request, atom: bool = False) -> bytes:  # noqa: FBT001
     """Generate RSS/Atom feed using the modular source."""
     source = get_feed_source()
     generator = RSSGenerator(source)
 
-    # Add self link to request URL
-    return generator.generate(atom=atom)
+    self_url = str(request.url)
+    return generator.generate(atom=atom, self_url=self_url)
 
 
-async def _rss_feed(_request: Request, atom: bool = False):  # noqa: FBT001
+async def _rss_feed(request: Request, atom: bool = False):  # noqa: FBT001
     feed_type = "atom" if atom else "rss"
     current_time = time.time()
 
@@ -72,7 +72,7 @@ async def _rss_feed(_request: Request, atom: bool = False):  # noqa: FBT001
         logger.info(f"Returning cached {feed_type} feed")
         return Response(content=cache[feed_type], media_type="application/xml", status_code=status.HTTP_200_OK)
 
-    rss_content = generate_rss(atom=atom)
+    rss_content = generate_rss(request, atom=atom)
     cache[feed_type] = rss_content
     cache_timestamp[feed_type] = current_time
     logger.info(f"Generated new {feed_type} feed and updated cache")

@@ -16,8 +16,15 @@ class RSSGenerator:
     def __init__(self, source: FeedSource):
         self.source = source
 
-    def generate(self, atom: bool = False) -> bytes:  # noqa: FBT001
-        """Generate RSS or Atom feed."""
+    def generate(self, atom: bool = False, self_url: str | None = None) -> bytes:  # noqa: FBT001
+        """
+        Generate RSS or Atom feed.
+
+        Args:
+            atom: If True, generate Atom feed; otherwise RSS
+            self_url: Optional self-referencing URL for RSS readers
+
+        """
         logger.info(f"Generating {'atom' if atom else 'rss'} feed from {self.source.feed_url}")
 
         items = asyncio.run(self.source.fetch_items())
@@ -26,6 +33,8 @@ class RSSGenerator:
         fg.title(self.source.feed_title)
         fg.id(self.source.feed_url)
         fg.link(href=self.source.feed_url)
+        if self_url:
+            fg.link(href=self_url, rel="self")
         fg.description(f"RSS feed of {self.source.feed_title}")
 
         for item in items:
