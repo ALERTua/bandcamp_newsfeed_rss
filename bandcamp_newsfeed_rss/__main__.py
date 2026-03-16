@@ -1,18 +1,14 @@
 import logging
 import os
-import re
 import time
-from datetime import datetime, timedelta
-from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
-
-import curl_cffi as cc
-from bs4 import BeautifulSoup
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, status, Response, Request
-from feedgen.feed import FeedGenerator
 from pydantic import BaseModel
+
+from .generators import RSSGenerator
+from .sources import BandcampScrapingSource
 
 load_dotenv()
 
@@ -20,9 +16,6 @@ BANDCAMP_USERNAME = os.getenv("BANDCAMP_USERNAME")
 assert BANDCAMP_USERNAME, "BANDCAMP_USERNAME environment variable not set"
 IDENTITY = os.getenv("IDENTITY")
 assert IDENTITY, "IDENTITY environment variable not set"
-
-URL = f"https://bandcamp.com/{BANDCAMP_USERNAME}/feed"
-COOKIES = {"identity": IDENTITY}
 
 VERBOSE = os.getenv("VERBOSE", "0")
 log_level = logging.DEBUG if VERBOSE == "1" else logging.INFO
@@ -36,10 +29,9 @@ logger = logging.getLogger(__name__)
 logger.info(f"Logging level set to {'DEBUG' if log_level == logging.DEBUG else 'INFO'}")
 
 # Cache configuration
-# Cache duration in seconds (default 60 minutes)
 CACHE_DURATION_SECONDS = int(os.getenv("CACHE_DURATION_SECONDS", "3600"))
-cache = {"rss": None, "atom": None}
-cache_timestamp = {"rss": 0.0, "atom": 0.0}
+cache: dict[str, bytes | None] = {"rss": None, "atom": None}
+cache_timestamp: dict[str, float] = {"rss": 0.0, "atom": 0.0}
 
 TZ = os.getenv("TZ", "Europe/London")
 TIMEZONE = ZoneInfo(TZ)
@@ -53,85 +45,28 @@ class HealthCheck(BaseModel):
     status: str = "OK"
 
 
-def generate_rss(request: Request, atom=False):  # noqa: PLR0915
-    logger.info("Requesting Bandcamp feed")
-    response = cc.get(URL, cookies=COOKIES, impersonate="chrome", timeout=30)
-    response.raise_for_status()
-    logger.info("Received response from Bandcamp")
-
-    soup = BeautifulSoup(response.content, "html.parser")
-    items = soup.find_all("li", class_="story nr")
-    items = items[::-1]  # Reverse the order of items
-    logger.debug(f"Found {len(items)} items in the feed")
-
-    fg = FeedGenerator()
-    fg.title(f"Bandcamp {BANDCAMP_USERNAME} Feed")
-    fg.id(URL)
-    fg.link(href=URL)
-    fg.link(href=str(request.url), rel="self")
-    fg.description(f"RSS feed of {BANDCAMP_USERNAME} Bandcamp news feed")
-
-    for item in items:
-        title = item.find("div", class_="collection-item-title").text.strip()
-        id_ = item.attrs.get("data-story-tralbum-key")
-        artist = item.find("a", class_="artist-name").text.strip()
-        album_link = item.find("a", class_="item-link")["href"]
-        # Clean album_link by removing query parameters and fragments
-        parsed = urlparse(album_link)
-        album_link = parsed._replace(query="", fragment="").geturl()
-        cover_image = item.find("img", class_="tralbum-art-large")["src"]
-        release_date = item.find("div", class_="story-date").text.strip().lower()
-
-        entry = fg.add_entry()
-        # entry.id(f"{album_link}#{id_}")
-        entry.guid(album_link, permalink=True)
-        entry.title(f"{title} by {artist}")
-        entry.link(href=album_link)
-        entry.author({"name": artist})
-        # Process HTML: remove tralbum-owners div and wrap in container
-        item_copy = BeautifulSoup(str(item), "html.parser")
-
-        remove_elements_classes = [
-            ("div", "tralbum-owners"),
-            ("div", "story-sidebar"),
-            ("div", "tralbum-wrapper-collect-controls"),
-            ("span", "track_play_time"),
-        ]
-        for div_type, div_class in remove_elements_classes:
-            div_to_remove = item_copy.find(div_type, class_=div_class)
-            if div_to_remove:
-                div_to_remove.decompose()
-
-        html_content = f'<div class="collection-item-container">{item_copy}</div>'
-
-        entry.description(html_content)
-
-        now = datetime.now(tz=TIMEZONE)
-        # Parse relative dates
-        if hours_match := re.match(r"^(\d+)\s+hours?\s+ago$", release_date):
-            hours = int(hours_match.group(1))
-            pub_date = now - timedelta(hours=hours)
-        elif minutes_match := re.match(r"^(\d+)\s+minutes?\s+ago$", release_date):
-            minutes = int(minutes_match.group(1))
-            pub_date = now - timedelta(minutes=minutes)
-        elif release_date == "yesterday":
-            pub_date = now - timedelta(days=1)
-        else:
-            try:
-                pub_date = datetime.strptime(release_date, "%b %d, %Y").replace(tzinfo=TIMEZONE)
-            except ValueError:
-                logger.warning(f"Unexpected date format for release_date: {release_date}")
-                pub_date = now
-
-        # pub_date = pub_date.replace(hour=12, minute=0, second=0, microsecond=0)
-        entry.pubDate(pub_date)
-        entry.enclosure(url=cover_image, type="image/jpeg")
-
-    logger.info("RSS feed generated successfully")
-    return fg.rss_str(pretty=True) if not atom else fg.atom_str(pretty=True)
+def get_feed_source() -> BandcampScrapingSource:
+    """Create and return the Bandcamp feed source."""
+    return BandcampScrapingSource(
+        username=BANDCAMP_USERNAME,
+        identity=IDENTITY,
+        timezone=TIMEZONE,
+    )
 
 
-async def _rss_feed(request: Request, atom=False):
+def generate_rss(request: Request, atom: bool = False) -> bytes:
+    """Generate RSS/Atom feed using the modular source."""
+    source = get_feed_source()
+    generator = RSSGenerator(source)
+
+    # Add self link to request URL
+    feed_content = generator.generate(atom=atom)
+
+    # Note: self link is handled in the generator if needed
+    return feed_content
+
+
+async def _rss_feed(request: Request, atom: bool = False):
     feed_type = "atom" if atom else "rss"
     current_time = time.time()
 
@@ -145,10 +80,6 @@ async def _rss_feed(request: Request, atom=False):
     cache_timestamp[feed_type] = current_time
     logger.info(f"Generated new {feed_type} feed and updated cache")
 
-    # TODO: consider
-    # TODO: media_type = "application/atom+xml" if atom else "application/rss+xml"
-    # TODO: return Response(content=rss_content, media_type=media_type, status_code=status.HTTP_200_OK)
-
     return Response(content=rss_content, media_type="application/xml", status_code=status.HTTP_200_OK)
 
 
@@ -160,7 +91,7 @@ async def rss_feed(request: Request):
 
 @app.get("/atom", response_class=Response)
 async def atom_feed(request: Request):
-    """Endpoint to generate and return the RSS feed."""
+    """Endpoint to generate and return the Atom feed."""
     return await _rss_feed(request, atom=True)
 
 
