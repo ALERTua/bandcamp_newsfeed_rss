@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from .models import HealthCheck
 from .routers import create_feed_router
 from .sources import BandcampScrapingSource
-from .config import logger
+from .config import logger, BANDCAMP_USERNAME, IDENTITY, TIMEZONE
 
 
 def create_feed_app() -> FastAPI:
@@ -22,7 +22,11 @@ def create_feed_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
 
     # Include feed routers
-    scraping_source = BandcampScrapingSource()
+    scraping_source = BandcampScrapingSource(
+        username=BANDCAMP_USERNAME,
+        identity=IDENTITY,
+        timezone=TIMEZONE,
+    )
     scraping_router = create_feed_router(scraping_source, prefix="")
     app.include_router(scraping_router)
 
