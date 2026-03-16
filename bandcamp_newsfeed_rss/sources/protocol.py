@@ -56,3 +56,7 @@ class FeedSource(Protocol):
     async def fetch_items(self) -> list[FeedItem]:
         """Fetch items from the feed source."""
         ...
+
+    async def close(self) -> None:
+        """Close any async resources."""
+        ...

@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, status, Response, Request
 from pydantic import BaseModel
 
-from bandcamp_newsfeed_rss.generators import RSSGenerator
-from bandcamp_newsfeed_rss.sources import BandcampScrapingSource
+from .generators import RSSGenerator
+from .sources import BandcampScrapingSource
 
 load_dotenv()
 
@@ -45,18 +45,33 @@ class HealthCheck(BaseModel):
     status: str = "OK"
 
 
-def get_feed_source() -> BandcampScrapingSource:
-    """Create and return the Bandcamp feed source."""
-    return BandcampScrapingSource(
-        username=BANDCAMP_USERNAME,
-        identity=IDENTITY,
-        timezone=TIMEZONE,
-    )
+class FeedSourceManager:
+    """Manages cached feed source instance."""
+
+    _instance: BandcampScrapingSource | None = None
+
+    @classmethod
+    def get(cls) -> BandcampScrapingSource:
+        """Get or create the feed source."""
+        if cls._instance is None:
+            cls._instance = BandcampScrapingSource(
+                username=BANDCAMP_USERNAME,
+                identity=IDENTITY,
+                timezone=TIMEZONE,
+            )
+        return cls._instance
+
+    @classmethod
+    async def close(cls) -> None:
+        """Close the feed source."""
+        if cls._instance is not None:
+            await cls._instance.close()
+            cls._instance = None
 
 
 async def generate_rss(request: Request, atom: bool = False) -> bytes:  # noqa: FBT001
     """Generate RSS/Atom feed using the modular source."""
-    source = get_feed_source()
+    source = FeedSourceManager.get()
     generator = RSSGenerator(source)
 
     self_url = str(request.url)
@@ -90,6 +105,13 @@ async def rss_feed(request: Request):
 async def atom_feed(request: Request):
     """Endpoint to generate and return the Atom feed."""
     return await _rss_feed(request, atom=True)
+
+
+@app.on_event("shutdown")
+async def shutdown_event() -> None:
+    """Close feed source on shutdown."""
+    await FeedSourceManager.close()
+    logger.info("Feed source closed")
 
 
 @app.get(

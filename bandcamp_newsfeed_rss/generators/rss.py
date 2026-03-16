@@ -4,7 +4,7 @@ import logging
 
 from feedgen.feed import FeedGenerator
 
-from bandcamp_newsfeed_rss.sources import FeedItem, FeedSource
+from .sources import FeedItem, FeedSource
 
 logger = logging.getLogger(__name__)
 

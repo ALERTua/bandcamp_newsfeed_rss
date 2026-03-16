@@ -1,5 +1,6 @@
 """Bandcamp scraping feed source."""
 
+import logging
 import re
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
@@ -9,6 +10,8 @@ from curl_cffi.requests import AsyncSession
 from zoneinfo import ZoneInfo
 
 from .protocol import FeedItem
+
+logger = logging.getLogger(__name__)
 
 
 class BandcampScrapingSource:
@@ -25,6 +28,7 @@ class BandcampScrapingSource:
         self.timezone = timezone or ZoneInfo("Europe/London")
         self._url = f"https://bandcamp.com/{username}/feed"
         self._cookies = {"identity": identity}
+        self._session = AsyncSession()
 
     @property
     def feed_url(self) -> str:
@@ -35,14 +39,17 @@ class BandcampScrapingSource:
         return f"Bandcamp {self.username} Feed"
 
     async def fetch_items(self) -> list[FeedItem]:
-        async with AsyncSession() as session:
-            response = await session.get(
+        try:
+            response = await self._session.get(
                 self._url,
                 cookies=self._cookies,
                 impersonate="chrome",
                 timeout=30,
             )
             response.raise_for_status()
+        except Exception:
+            logger.exception("Failed to fetch Bandcamp feed")
+            raise
 
         soup = BeautifulSoup(response.content, "html.parser")
         items = soup.find_all("li", class_="story nr")
@@ -54,7 +61,12 @@ class BandcampScrapingSource:
             if feed_item:
                 feed_items.append(feed_item)
 
+        logger.info(f"Fetched {len(feed_items)} items from Bandcamp feed")
         return feed_items
+
+    async def close(self) -> None:
+        """Close the async session."""
+        await self._session.close()
 
     def _parse_item(self, item: BeautifulSoup) -> FeedItem | None:
         try:
