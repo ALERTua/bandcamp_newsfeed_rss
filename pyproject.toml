@@ -15,9 +15,19 @@ dependencies = [
     "uvicorn",
 ]
 
-# # relying on uv tool
-#[dependency-groups]
-#dev = [
-#    "pre-commit>=4.1.0",
-#    "ruff>=0.9.6",
-#]
+[dependency-groups]
+dev = [
+    "pytest-asyncio",
+    "pre-commit-uv",
+    "ruff",
+]
+
+
+[tool.pytest.ini_options]
+minversion = "8.3.5"
+addopts = "-ra -q -m 'not e2e'"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+markers = [
+    "e2e: marks tests as end-to-end tests that require real network access (deselect with '-m \"not e2e\"')",
+]

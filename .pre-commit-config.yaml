@@ -27,6 +27,15 @@ repos:
     hooks:
       - id: uv-lock
 
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.25
     hooks:
