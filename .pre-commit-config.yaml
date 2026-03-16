@@ -31,7 +31,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: uv run pytest
+        entry: bash -c 'export TESTING=1 && uv run pytest'
         language: system
         pass_filenames: false
         always_run: true
