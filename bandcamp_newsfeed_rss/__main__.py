@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from contextlib import asynccontextmanager
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
@@ -36,14 +37,6 @@ cache_timestamp: dict[str, float] = {"rss": 0.0, "atom": 0.0}
 TZ = os.getenv("TZ", "Europe/London")
 TIMEZONE = ZoneInfo(TZ)
 
-app = FastAPI()
-
-
-class HealthCheck(BaseModel):
-    """Response model to validate and return when performing a health check."""
-
-    status: str = "OK"
-
 
 class FeedSourceManager:
     """Manages cached feed source instance."""
@@ -67,6 +60,24 @@ class FeedSourceManager:
         if cls._instance is not None:
             await cls._instance.close()
             cls._instance = None
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Lifespan context manager for startup/shutdown events."""
+    logger.info("Starting up...")
+    yield
+    await FeedSourceManager.close()
+    logger.info("Shutdown complete")
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+class HealthCheck(BaseModel):
+    """Response model to validate and return when performing a health check."""
+
+    status: str = "OK"
 
 
 async def generate_rss(request: Request, atom: bool = False) -> bytes:  # noqa: FBT001
@@ -105,13 +116,6 @@ async def rss_feed(request: Request):
 async def atom_feed(request: Request):
     """Endpoint to generate and return the Atom feed."""
     return await _rss_feed(request, atom=True)
-
-
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    """Close feed source on shutdown."""
-    await FeedSourceManager.close()
-    logger.info("Feed source closed")
 
 
 @app.get(
