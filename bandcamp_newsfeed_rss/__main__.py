@@ -6,13 +6,9 @@ import uvicorn
 
 from .app import create_feed_app
 
-
-def main() -> None:
-    """Run the application."""
-    app = create_feed_app()
-    port = int(os.getenv("PORT", "8000"))
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+app = create_feed_app()
+port = int(os.getenv("PORT", "8000"))
 
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
