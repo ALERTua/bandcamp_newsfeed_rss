@@ -26,3 +26,10 @@ repos:
     rev: 0.10.10
     hooks:
       - id: uv-lock
+
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.25
+    hooks:
+      - id: validate-pyproject
+        # Optional extra validations from SchemaStore:
+        additional_dependencies: [ "validate-pyproject-schema-store[all]" ]
