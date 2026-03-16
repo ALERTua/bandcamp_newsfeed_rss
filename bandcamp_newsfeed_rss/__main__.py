@@ -1,7 +1,10 @@
+import os
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status, Response, Request
 from pydantic import BaseModel
+import uvicorn
 
 from .config import (
     CACHE_DURATION_SECONDS,
@@ -68,66 +71,56 @@ async def _rss_feed(request: Request, atom: bool = False):  # noqa: FBT001
     return Response(content=rss_content, media_type="application/xml", status_code=status.HTTP_200_OK)
 
 
-app = FastAPI()
-
-
 class HealthCheck(BaseModel):
     """Response model to validate and return when performing a health check."""
 
     status: str = "OK"
 
 
-@app.get("/rss", response_class=Response)
-async def rss_feed(request: Request):
-    """Endpoint to generate and return the RSS feed."""
-    return await _rss_feed(request, atom=False)
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Lifespan context manager for startup/shutdown events."""
+    logger.info("Starting up...")
+    yield
+    await FeedSourceManager.close()
+    logger.info("Shutdown complete")
 
 
-@app.get("/atom", response_class=Response)
-async def atom_feed(request: Request):
-    """Endpoint to generate and return the Atom feed."""
-    return await _rss_feed(request, atom=True)
-
-
-@app.get(
-    "/health",
-    tags=["healthcheck"],
-    summary="Perform a Health Check",
-    response_description="Return HTTP Status Code 200 (OK)",
-    status_code=status.HTTP_200_OK,
-)
-def get_health() -> HealthCheck:
-    """Perform a health check."""
-    logger.debug("Health check endpoint accessed")
-    return HealthCheck(status="OK")
-
-
-if __name__ == "__main__":
-    import os
-    from contextlib import asynccontextmanager
-
-    @asynccontextmanager
-    async def lifespan(_app: FastAPI):
-        logger.info("Starting up...")
-        yield
-        await FeedSourceManager.close()
-        logger.info("Shutdown complete")
-
-    import uvicorn
-
-    # Recreate app with lifespan for direct run
+def create_app() -> FastAPI:
+    """Create and configure the FastAPI application."""
     app = FastAPI(lifespan=lifespan)
 
     @app.get("/rss", response_class=Response)
     async def rss_feed(request: Request):
+        """Endpoint to generate and return the RSS feed."""
         return await _rss_feed(request, atom=False)
 
     @app.get("/atom", response_class=Response)
     async def atom_feed(request: Request):
+        """Endpoint to generate and return the Atom feed."""
         return await _rss_feed(request, atom=True)
 
-    @app.get("/health", tags=["healthcheck"], status_code=status.HTTP_200_OK)
+    @app.get(
+        "/health",
+        tags=["healthcheck"],
+        summary="Perform a Health Check",
+        response_description="Return HTTP Status Code 200 (OK)",
+        status_code=status.HTTP_200_OK,
+    )
     def get_health() -> HealthCheck:
+        """Perform a health check."""
+        logger.debug("Health check endpoint accessed")
         return HealthCheck(status="OK")
 
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")), log_level="info")
+    return app
+
+
+def main() -> None:
+    """Run the application."""
+    app = create_app()
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+
+
+if __name__ == "__main__":
+    main()
