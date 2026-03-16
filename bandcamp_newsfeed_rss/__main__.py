@@ -1,41 +1,21 @@
-import logging
-import os
 import time
-from contextlib import asynccontextmanager
-from zoneinfo import ZoneInfo
 
-from dotenv import load_dotenv
 from fastapi import FastAPI, status, Response, Request
 from pydantic import BaseModel
 
+from .config import (
+    CACHE_DURATION_SECONDS,
+    BANDCAMP_USERNAME,
+    IDENTITY,
+    TIMEZONE,
+    logger,
+)
 from .generators import RSSGenerator
 from .sources import BandcampScrapingSource
 
-load_dotenv()
-
-BANDCAMP_USERNAME = os.getenv("BANDCAMP_USERNAME")
-assert BANDCAMP_USERNAME, "BANDCAMP_USERNAME environment variable not set"
-IDENTITY = os.getenv("IDENTITY")
-assert IDENTITY, "IDENTITY environment variable not set"
-
-VERBOSE = os.getenv("VERBOSE", "0")
-log_level = logging.DEBUG if VERBOSE == "1" else logging.INFO
-
-logging.basicConfig(
-    level=log_level,
-    format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s",
-    handlers=[logging.StreamHandler()],
-)
-logger = logging.getLogger(__name__)
-logger.info(f"Logging level set to {'DEBUG' if log_level == logging.DEBUG else 'INFO'}")
-
-# Cache configuration
-CACHE_DURATION_SECONDS = int(os.getenv("CACHE_DURATION_SECONDS", "3600"))
+# Cache
 cache: dict[str, bytes | None] = {"rss": None, "atom": None}
 cache_timestamp: dict[str, float] = {"rss": 0.0, "atom": 0.0}
-
-TZ = os.getenv("TZ", "Europe/London")
-TIMEZONE = ZoneInfo(TZ)
 
 
 class FeedSourceManager:
@@ -60,24 +40,6 @@ class FeedSourceManager:
         if cls._instance is not None:
             await cls._instance.close()
             cls._instance = None
-
-
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    """Lifespan context manager for startup/shutdown events."""
-    logger.info("Starting up...")
-    yield
-    await FeedSourceManager.close()
-    logger.info("Shutdown complete")
-
-
-app = FastAPI(lifespan=lifespan)
-
-
-class HealthCheck(BaseModel):
-    """Response model to validate and return when performing a health check."""
-
-    status: str = "OK"
 
 
 async def generate_rss(request: Request, atom: bool = False) -> bytes:  # noqa: FBT001
@@ -106,6 +68,15 @@ async def _rss_feed(request: Request, atom: bool = False):  # noqa: FBT001
     return Response(content=rss_content, media_type="application/xml", status_code=status.HTTP_200_OK)
 
 
+app = FastAPI()
+
+
+class HealthCheck(BaseModel):
+    """Response model to validate and return when performing a health check."""
+
+    status: str = "OK"
+
+
 @app.get("/rss", response_class=Response)
 async def rss_feed(request: Request):
     """Endpoint to generate and return the RSS feed."""
@@ -126,23 +97,37 @@ async def atom_feed(request: Request):
     status_code=status.HTTP_200_OK,
 )
 def get_health() -> HealthCheck:
-    """
-    ## Perform a Health Check
-    Endpoint to perform a healthcheck on. This endpoint can primarily be used Docker
-    to ensure a robust container orchestration and management is in place. Other
-    services which rely on proper functioning of the API service will not deploy if this
-    endpoint returns any other HTTP status code except 200 (OK).
-
-    Returns
-    -------
-        HealthCheck: Returns a JSON response with the health status
-
-    """
+    """Perform a health check."""
     logger.debug("Health check endpoint accessed")
     return HealthCheck(status="OK")
 
 
 if __name__ == "__main__":
+    import os
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        logger.info("Starting up...")
+        yield
+        await FeedSourceManager.close()
+        logger.info("Shutdown complete")
+
     import uvicorn
+
+    # Recreate app with lifespan for direct run
+    app = FastAPI(lifespan=lifespan)
+
+    @app.get("/rss", response_class=Response)
+    async def rss_feed(request: Request):
+        return await _rss_feed(request, atom=False)
+
+    @app.get("/atom", response_class=Response)
+    async def atom_feed(request: Request):
+        return await _rss_feed(request, atom=True)
+
+    @app.get("/health", tags=["healthcheck"], status_code=status.HTTP_200_OK)
+    def get_health() -> HealthCheck:
+        return HealthCheck(status="OK")
 
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")), log_level="info")
