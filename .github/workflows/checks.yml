@@ -29,10 +29,5 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --all-extras --dev
 
-      - name: Set test environment variables
-        run: |
-          export BANDCAMP_USERNAME="test_user"
-          export IDENTITY="test_identity_value"
-
       - name: Pre-commit on all files
-        run: uv run pre-commit run --all-files
+        run: BANDCAMP_USERNAME="test_user" IDENTITY="test_identity_value" uv run pre-commit run --all-files
