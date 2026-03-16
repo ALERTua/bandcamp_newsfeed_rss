@@ -1,6 +1,6 @@
 """Unit tests for cache."""
+
 import time
-import pytest
 
 from bandcamp_newsfeed_rss import cache
 

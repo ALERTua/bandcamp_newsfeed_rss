@@ -1,6 +1,7 @@
 """Unit tests for feed sources."""
+
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from bandcamp_newsfeed_rss.sources.protocol import FeedItem, FeedSource
 
@@ -27,7 +28,7 @@ class MockFeedSource:
                 link="https://example.com/item1",
                 author="Test Author",
                 description="Test description",
-                pub_date=datetime.now(timezone.utc),
+                pub_date=datetime.now(UTC),
             ),
         ]
 
@@ -60,7 +61,7 @@ def test_feed_item_creation() -> None:
         link="https://example.com",
         author="Author",
         description="Description",
-        pub_date=datetime.now(timezone.utc),
+        pub_date=datetime.now(UTC),
         guid="guid-123",
         enclosure_url="https://example.com/cover.jpg",
     )
@@ -79,7 +80,7 @@ def test_feed_item_to_dict() -> None:
         link="https://example.com",
         author="Author",
         description="Description",
-        pub_date=datetime.now(timezone.utc),
+        pub_date=datetime.now(UTC),
     )
 
     result = item.to_dict()

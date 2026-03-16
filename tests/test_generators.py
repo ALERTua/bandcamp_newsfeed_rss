@@ -1,7 +1,7 @@
 """Unit tests for RSS generator."""
+
 import pytest
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
+from datetime import datetime, UTC
 
 from bandcamp_newsfeed_rss.generators import RSSGenerator
 from bandcamp_newsfeed_rss.sources.protocol import FeedItem
@@ -19,7 +19,7 @@ class MockFeedSource:
                 link="https://example.com/item1",
                 author="Author 1",
                 description="Description 1",
-                pub_date=datetime(2024, 1, 1, tzinfo=timezone.utc),
+                pub_date=datetime(2024, 1, 1, tzinfo=UTC),
             ),
         ]
 
@@ -74,7 +74,7 @@ async def test_generate_with_enclosure() -> None:
             link="https://example.com/item1",
             author="Author",
             description="Description",
-            pub_date=datetime.now(timezone.utc),
+            pub_date=datetime.now(UTC),
             enclosure_url="https://example.com/cover.jpg",
             enclosure_type="image/jpeg",
         ),

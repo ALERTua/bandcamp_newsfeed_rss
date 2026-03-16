@@ -1,5 +1,4 @@
 """Unit tests for source registry."""
-import pytest
 
 from bandcamp_newsfeed_rss.sources.registry import (
     FEED_SOURCES,
