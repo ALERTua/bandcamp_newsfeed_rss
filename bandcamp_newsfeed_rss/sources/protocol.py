@@ -1,7 +1,11 @@
 """Feed source abstractions."""
 
-from datetime import datetime
-from typing import Protocol, Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Protocol, Any
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 class FeedItem:

@@ -1,10 +1,14 @@
 """RSS/Atom feed generator."""
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from feedgen.feed import FeedGenerator
 
-from .sources import FeedItem, FeedSource
+if TYPE_CHECKING:
+    from .sources import FeedItem, FeedSource
 
 logger = logging.getLogger(__name__)
 
