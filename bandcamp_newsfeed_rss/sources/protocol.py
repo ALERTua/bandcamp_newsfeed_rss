@@ -1,4 +1,5 @@
 """Feed source abstractions."""
+
 from datetime import datetime
 from typing import Protocol, Any
 

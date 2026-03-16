@@ -1,6 +1,6 @@
 """RSS/Atom feed generator."""
+
 import logging
-from typing import Any
 
 from feedgen.feed import FeedGenerator
 
@@ -20,6 +20,7 @@ class RSSGenerator:
         logger.info(f"Generating {'atom' if atom else 'rss'} feed from {self.source.feed_url}")
 
         import asyncio
+
         items = asyncio.run(self.source.fetch_items())
 
         fg = FeedGenerator()

@@ -1,13 +1,14 @@
 """Bandcamp scraping feed source."""
+
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 import curl_cffi as cc
 from bs4 import BeautifulSoup
 from zoneinfo import ZoneInfo
 
-from .protocol import FeedItem, FeedSource
+from .protocol import FeedItem
 
 
 class BandcampScrapingSource:
