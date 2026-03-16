@@ -9,16 +9,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Required settings
-BANDCAMP_USERNAME = os.getenv("BANDCAMP_USERNAME") or os.getenv("TEST_BANDCAMP_USERNAME")
-IDENTITY = os.getenv("IDENTITY") or os.getenv("TEST_IDENTITY")
-
-# Allow tests to run without real credentials
-if os.getenv("TESTING"):
-    BANDCAMP_USERNAME = BANDCAMP_USERNAME or "test_user"
-    IDENTITY = IDENTITY or "test_identity"
-else:
-    assert BANDCAMP_USERNAME, "BANDCAMP_USERNAME environment variable not set"
-    assert IDENTITY, "IDENTITY environment variable not set"
+BANDCAMP_USERNAME = os.getenv("BANDCAMP_USERNAME")
+assert BANDCAMP_USERNAME, "BANDCAMP_USERNAME environment variable not set"
+IDENTITY = os.getenv("IDENTITY")
+assert IDENTITY, "IDENTITY environment variable not set"
 
 # Optional settings with defaults
 VERBOSE = os.getenv("VERBOSE", "0")
