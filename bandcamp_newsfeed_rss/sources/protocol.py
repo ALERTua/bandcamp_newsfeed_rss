@@ -7,7 +7,7 @@ from typing import Protocol, Any
 class FeedItem:
     """Represents a single item in a feed."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         title: str,
         link: str,

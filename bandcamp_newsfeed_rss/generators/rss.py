@@ -1,10 +1,10 @@
 """RSS/Atom feed generator."""
-
+import asyncio
 import logging
 
 from feedgen.feed import FeedGenerator
 
-from ..sources import FeedItem, FeedSource
+from bandcamp_newsfeed_rss.sources import FeedItem, FeedSource
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +15,9 @@ class RSSGenerator:
     def __init__(self, source: FeedSource):
         self.source = source
 
-    def generate(self, atom: bool = False) -> bytes:
+    def generate(self, atom: bool = False) -> bytes:  # noqa: FBT001
         """Generate RSS or Atom feed."""
         logger.info(f"Generating {'atom' if atom else 'rss'} feed from {self.source.feed_url}")
-
-        import asyncio
 
         items = asyncio.run(self.source.fetch_items())
 
@@ -30,12 +28,12 @@ class RSSGenerator:
         fg.description(f"RSS feed of {self.source.feed_title}")
 
         for item in items:
-            self._add_entry(fg, item, atom=atom)
+            self._add_entry(fg, item)
 
         logger.info(f"Generated feed with {len(items)} items")
         return fg.atom_str(pretty=True) if atom else fg.rss_str(pretty=True)
 
-    def _add_entry(self, fg: FeedGenerator, item: FeedItem, atom: bool = False) -> None:
+    def _add_entry(self, fg: FeedGenerator, item: FeedItem) -> None:
         entry = fg.add_entry()
         entry.guid(item.guid or item.link, permalink=True)
         entry.title(item.title)

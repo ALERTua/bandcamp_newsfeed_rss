@@ -18,11 +18,11 @@ class BandcampScrapingSource:
         self,
         username: str,
         identity: str,
-        timezone: ZoneInfo = ZoneInfo("Europe/London"),
+        timezone: ZoneInfo | None = None,
     ):
         self.username = username
         self.identity = identity
-        self.timezone = timezone
+        self.timezone = timezone or ZoneInfo("Europe/London")
         self._url = f"https://bandcamp.com/{username}/feed"
         self._cookies = {"identity": identity}
 
@@ -86,7 +86,7 @@ class BandcampScrapingSource:
                 guid=album_link,
                 enclosure_url=cover_image,
             )
-        except Exception:
+        except (AttributeError, TypeError):
             return None
 
     def _parse_date(self, release_date: str) -> datetime:
