@@ -1,6 +1,5 @@
 """RSS/Atom feed generator."""
 
-import asyncio
 import logging
 
 from feedgen.feed import FeedGenerator
@@ -16,7 +15,7 @@ class RSSGenerator:
     def __init__(self, source: FeedSource):
         self.source = source
 
-    def generate(self, atom: bool = False, self_url: str | None = None) -> bytes:  # noqa: FBT001
+    async def generate(self, atom: bool = False, self_url: str | None = None) -> bytes:  # noqa: FBT001
         """
         Generate RSS or Atom feed.
 
@@ -27,7 +26,7 @@ class RSSGenerator:
         """
         logger.info(f"Generating {'atom' if atom else 'rss'} feed from {self.source.feed_url}")
 
-        items = asyncio.run(self.source.fetch_items())
+        items = await self.source.fetch_items()
 
         fg = FeedGenerator()
         fg.title(self.source.feed_title)

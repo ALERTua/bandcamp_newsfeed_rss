@@ -4,8 +4,8 @@ import re
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
-import curl_cffi as cc
 from bs4 import BeautifulSoup
+from curl_cffi.requests import AsyncSession
 from zoneinfo import ZoneInfo
 
 from .protocol import FeedItem
@@ -35,8 +35,14 @@ class BandcampScrapingSource:
         return f"Bandcamp {self.username} Feed"
 
     async def fetch_items(self) -> list[FeedItem]:
-        response = cc.get(self._url, cookies=self._cookies, impersonate="chrome", timeout=30)
-        response.raise_for_status()
+        async with AsyncSession() as session:
+            response = await session.get(
+                self._url,
+                cookies=self._cookies,
+                impersonate="chrome",
+                timeout=30,
+            )
+            response.raise_for_status()
 
         soup = BeautifulSoup(response.content, "html.parser")
         items = soup.find_all("li", class_="story nr")

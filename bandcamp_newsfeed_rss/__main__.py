@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, status, Response, Request
 from pydantic import BaseModel
 
-from .generators import RSSGenerator
-from .sources import BandcampScrapingSource
+from bandcamp_newsfeed_rss.generators import RSSGenerator
+from bandcamp_newsfeed_rss.sources import BandcampScrapingSource
 
 load_dotenv()
 
@@ -54,13 +54,13 @@ def get_feed_source() -> BandcampScrapingSource:
     )
 
 
-def generate_rss(request: Request, atom: bool = False) -> bytes:  # noqa: FBT001
+async def generate_rss(request: Request, atom: bool = False) -> bytes:  # noqa: FBT001
     """Generate RSS/Atom feed using the modular source."""
     source = get_feed_source()
     generator = RSSGenerator(source)
 
     self_url = str(request.url)
-    return generator.generate(atom=atom, self_url=self_url)
+    return await generator.generate(atom=atom, self_url=self_url)
 
 
 async def _rss_feed(request: Request, atom: bool = False):  # noqa: FBT001
@@ -72,7 +72,7 @@ async def _rss_feed(request: Request, atom: bool = False):  # noqa: FBT001
         logger.info(f"Returning cached {feed_type} feed")
         return Response(content=cache[feed_type], media_type="application/xml", status_code=status.HTTP_200_OK)
 
-    rss_content = generate_rss(request, atom=atom)
+    rss_content = await generate_rss(request, atom=atom)
     cache[feed_type] = rss_content
     cache_timestamp[feed_type] = current_time
     logger.info(f"Generated new {feed_type} feed and updated cache")
