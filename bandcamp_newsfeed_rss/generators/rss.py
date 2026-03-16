@@ -1,4 +1,5 @@
 """RSS/Atom feed generator."""
+
 import asyncio
 import logging
 
