@@ -1,14 +1,13 @@
 """RSS/Atom feed generator."""
 
-from __future__ import annotations
-
 import logging
 from typing import TYPE_CHECKING
 
 from feedgen.feed import FeedGenerator
+from bandcamp_newsfeed_rss.models import FeedType
 
 if TYPE_CHECKING:
-    from ..sources import FeedItem, FeedSource
+    from bandcamp_newsfeed_rss.sources import FeedItem, FeedSource
 
 logger = logging.getLogger(__name__)
 
@@ -16,19 +15,13 @@ logger = logging.getLogger(__name__)
 class RSSGenerator:
     """Generates RSS/Atom feeds from FeedSource."""
 
-    def __init__(self, source: FeedSource):
+    def __init__(self, source: FeedSource, feed_type: str):
         self.source = source
+        self.feed_type = feed_type
 
-    async def generate(self, atom: bool = False, self_url: str | None = None) -> bytes:  # noqa: FBT001
-        """
-        Generate RSS or Atom feed.
-
-        Args:
-            atom: If True, generate Atom feed; otherwise RSS
-            self_url: Optional self-referencing URL for RSS readers
-
-        """
-        logger.info(f"Generating {'atom' if atom else 'rss'} feed from {self.source.feed_url}")
+    async def generate(self) -> bytes:
+        """Generate RSS or Atom feed."""
+        logger.info(f"Generating {self.feed_type} feed from {self.source.feed_url}")
 
         items = await self.source.fetch_items()
 
@@ -36,15 +29,22 @@ class RSSGenerator:
         fg.title(self.source.feed_title)
         fg.id(self.source.feed_url)
         fg.link(href=self.source.feed_url)
-        if self_url:
-            fg.link(href=self_url, rel="self")
+        if self.source.feed_url:
+            fg.link(href=self.source.feed_url, rel="self")
         fg.description(f"RSS feed of {self.source.feed_title}")
 
         for item in items:
             self._add_entry(fg, item)
 
         logger.info(f"Generated feed with {len(items)} items")
-        return fg.atom_str(pretty=True) if atom else fg.rss_str(pretty=True)
+        match self.feed_type:
+            case FeedType.RSS:
+                return fg.rss_str(pretty=True)
+            case FeedType.ATOM:
+                return fg.atom_str(pretty=True)
+            case _:
+                msg = f"Unknown feed type: {self.feed_type}"
+                raise ValueError(msg)
 
     def _add_entry(self, fg: FeedGenerator, item: FeedItem) -> None:
         entry = fg.add_entry()

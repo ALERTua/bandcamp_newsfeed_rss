@@ -1,0 +1,14 @@
+GET http://127.0.0.1:8000/rss
+Accept: application/xml
+
+###
+GET http://127.0.0.1:8000/atom
+Accept: application/xml
+
+###
+GET http://127.0.0.1:8000/rss?source=api
+Accept: application/xml
+
+###
+GET http://127.0.0.1:8000/atom?source=api
+Accept: application/xml

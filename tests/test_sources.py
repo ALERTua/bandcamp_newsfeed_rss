@@ -3,7 +3,11 @@
 import pytest
 from datetime import datetime, UTC
 
-from bandcamp_newsfeed_rss.sources.protocol import FeedItem, FeedSource
+from bandcamp_newsfeed_rss.models import FeedItem
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bandcamp_newsfeed_rss.sources.protocol import FeedSource
 
 
 class MockFeedSource:
@@ -71,21 +75,3 @@ def test_feed_item_creation() -> None:
     assert item.author == "Author"
     assert item.guid == "guid-123"
     assert item.enclosure_url == "https://example.com/cover.jpg"
-
-
-def test_feed_item_to_dict() -> None:
-    """Test FeedItem.to_dict() method."""
-    item = FeedItem(
-        title="Title",
-        link="https://example.com",
-        author="Author",
-        description="Description",
-        pub_date=datetime.now(UTC),
-    )
-
-    result = item.to_dict()
-
-    assert isinstance(result, dict)
-    assert result["title"] == "Title"
-    assert result["link"] == "https://example.com"
-    assert result["author"] == "Author"
