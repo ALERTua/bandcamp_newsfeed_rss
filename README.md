@@ -38,7 +38,7 @@ BANDCAMP_USERNAME=my_bandcamp_username
 IDENTITY=7%09ABCV1A%2B12D12D12ABCDEJbOCvA8Mfi90betEmFcYfhs%3D%09%7B%22id%22%3A135750916%2C%22ex%22%3A0%7D
 PORT=8000
 CACHE_DURATION_SECONDS=3600
-TZ=Europe/Kiev
+TZ=Europe/Kyiv
 VERBOSE=0
 ```
 
@@ -60,16 +60,38 @@ VERBOSE=0
 - `/health` - Health check
 
 
+### Query Parameters
+
+Both `/rss` and `/atom` endpoints support the following query parameter:
+
+| Parameter | Type   | Default    | Description                   |
+|-----------|--------|------------|-------------------------------|
+| `source`  | string | `scraping` | Source type. Described below. |
+
+
+#### Source Types
+
+| Source     | Description                                                                               |
+|------------|-------------------------------------------------------------------------------------------|
+| `scraping` | **Default**. Uses web scraping to parse the Bandcamp feed page HTML.                      |
+| `api`      | Uses the [Bandcamp API](https://github.com/ALERTua/bandcamp_async_api) to fetch the feed. |
+
+
+#### Examples
+
+- `http://127.0.0.1:8000/rss` — Default scraping source (RSS)
+- `http://127.0.0.1:8000/atom` — Default scraping source (Atom)
+- `http://127.0.0.1:8000/rss?source=api` — Using Bandcamp API source (RSS)
+- `http://127.0.0.1:8000/atom?source=api` — Using Bandcamp API source (Atom)
+
 ## Running locally
 
 * Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
-* Pre-create `.env` using [.env.example](.env.example)
+* Pre-create `.env` in your Home directory from [.env.example](.env.example)
 * Run the project
 ```bash
-uv run bandcamp_newsfeed_rss
+uvx --from https://github.com/ALERTua/bandcamp_newsfeed_rss bandcamp_newsfeed_rss
 ```
-* Open http://127.0.0.1:8000/rss in the browser.
-Other endpoints are described below
 
 ## Docker Deployment
 

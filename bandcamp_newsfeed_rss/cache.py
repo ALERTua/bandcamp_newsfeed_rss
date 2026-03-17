@@ -5,8 +5,8 @@ import time
 from .config import CACHE_DURATION_SECONDS, logger
 
 # Cache storage
-cache: dict[str, bytes | None] = {"rss": None, "atom": None}
-cache_timestamp: dict[str, float] = {"rss": 0.0, "atom": 0.0}
+cache: dict[str, bytes | None] = {}
+cache_timestamp: dict[str, float] = {}
 
 
 def get_cached(feed_type: str) -> bytes | None:
@@ -23,3 +23,9 @@ def set_cached(feed_type: str, content: bytes) -> None:
     cache[feed_type] = content
     cache_timestamp[feed_type] = time.time()
     logger.info(f"Cached new {feed_type} feed")
+
+
+def clear_cache() -> None:
+    """Remove all entries from the cache."""
+    cache.clear()
+    cache_timestamp.clear()

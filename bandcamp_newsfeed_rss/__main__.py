@@ -4,9 +4,9 @@ import os
 
 import uvicorn
 
-from .app import create_feed_app
+from .app import create_app
 
-app = create_feed_app()
+app = create_app()
 port = int(os.getenv("PORT", "8000"))
 
 

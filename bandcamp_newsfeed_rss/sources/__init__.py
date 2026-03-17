@@ -1,14 +1,13 @@
 """Feed sources."""
 
 from .bandcamp import BandcampScrapingSource
-from .protocol import FeedItem, FeedSource
-from .registry import FEED_SOURCES, get_source_class, register_source
+from .bandcamp_api import BandcampAPISource
+from .protocol import FeedSource
+from ..models import FeedItem
 
 __all__ = [
-    "FEED_SOURCES",
+    "BandcampAPISource",
     "BandcampScrapingSource",
     "FeedItem",
     "FeedSource",
-    "get_source_class",
-    "register_source",
 ]

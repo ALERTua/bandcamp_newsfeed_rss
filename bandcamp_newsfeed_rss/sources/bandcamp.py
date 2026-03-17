@@ -7,29 +7,31 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from curl_cffi.requests import AsyncSession
-from zoneinfo import ZoneInfo
 
-from .protocol import FeedItem
-from .registry import register_source
+from ..models import FeedItem
+from typing import TYPE_CHECKING, Self
+
+if TYPE_CHECKING:
+    from zoneinfo import ZoneInfo
+
 
 logger = logging.getLogger(__name__)
 
 
-@register_source("scraping")
 class BandcampScrapingSource:
     """Bandcamp feed source using web scraping."""
 
     def __init__(
         self,
-        username: str,
-        identity: str,
-        timezone: ZoneInfo | None = None,
+        bandcamp_username: str,
+        identity_token: str,
+        timezone: ZoneInfo,
     ):
-        self.username = username
-        self.identity = identity
-        self.timezone = timezone or ZoneInfo("Europe/London")
-        self._url = f"https://bandcamp.com/{username}/feed"
-        self._cookies = {"identity": identity}
+        self.bandcamp_username = bandcamp_username
+        self.identity_token = identity_token
+        self.timezone = timezone
+        self._url = f"https://bandcamp.com/{bandcamp_username}/feed"
+        self._cookies = {"identity": identity_token}
         self._session = AsyncSession()
 
     @property
@@ -38,7 +40,7 @@ class BandcampScrapingSource:
 
     @property
     def feed_title(self) -> str:
-        return f"Bandcamp {self.username} Feed"
+        return f"Bandcamp {self.bandcamp_username} Feed"
 
     async def fetch_items(self) -> list[FeedItem]:
         try:
@@ -69,6 +71,12 @@ class BandcampScrapingSource:
     async def close(self) -> None:
         """Close the async session."""
         await self._session.close()
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        await self.close()
 
     def _parse_item(self, item: BeautifulSoup) -> FeedItem | None:
         try:
@@ -123,7 +131,7 @@ class BandcampScrapingSource:
         if release_date == "yesterday":
             return now - timedelta(days=1)
 
-        try:
+        try:  # 'jan 28, 2026'
             return datetime.strptime(release_date, "%b %d, %Y").replace(tzinfo=self.timezone)
         except ValueError:
             return now
