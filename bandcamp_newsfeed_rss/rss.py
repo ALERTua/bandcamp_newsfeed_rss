@@ -53,7 +53,8 @@ class RSSGenerator:
         entry.link(href=item.link)
         entry.author({"name": item.author})
         entry.description(item.description)
-        entry.pubDate(item.pub_date)
+        entry.published(item.pub_date)
+        entry.updated(item.pub_date)
         for tag in item.tags:
             entry.category(term=tag)
 
