@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Self
 from bandcamp_async_api import BandcampAPIClient, FeedStory
 
 from ..models import FeedItem
+from ..config import BANDCAMP_FILTER_PREORDERS
+
 
 if TYPE_CHECKING:
     from zoneinfo import ZoneInfo
@@ -147,7 +149,11 @@ class BandcampAPISource:
             logger.exception("Failed to fetch Bandcamp API feed")
             raise
 
-        feed_items = [self._feed_story_to_feed_item(story) for story in feed_response.stories[::-1]]
+        stories = feed_response.stories[::-1]
+        if BANDCAMP_FILTER_PREORDERS:
+            stories = [_ for _ in stories if not _.is_preorder]
+
+        feed_items = [self._feed_story_to_feed_item(_) for _ in stories]
 
         logger.info(f"Fetched {len(feed_items)} items from Bandcamp API feed")
         return feed_items
