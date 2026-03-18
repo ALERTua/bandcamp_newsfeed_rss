@@ -1,7 +1,7 @@
-"""Pydantic models."""
+"""Models."""
 
 from enum import StrEnum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pydantic import BaseModel
 
 from typing import TYPE_CHECKING
@@ -10,23 +10,20 @@ if TYPE_CHECKING:
     from datetime import datetime
 
 
-class SourceType(StrEnum):
-    SCRAPING = "scraping"
-    API = "api"
+class StrEnumBase(StrEnum):
+    """Base class for StrEnums."""
 
     @classmethod
     def values(cls):
         return [member.value for member in cls]
 
 
-class HealthCheck(BaseModel):
-    """Response model for health check endpoint."""
+class SourceType(StrEnumBase):
+    SCRAPING = "scraping"
+    API = "api"
 
-    status: str = "OK"
 
-
-@dataclass(frozen=True)
-class FeedType:
+class FeedType(StrEnumBase):
     """Feed type."""
 
     RSS = "rss"
@@ -45,3 +42,10 @@ class FeedItem:
     guid: str | None = None
     enclosure_url: str | None = None
     enclosure_type: str = "image/jpeg"
+    tags: list[str] = field(default_factory=list)
+
+
+class HealthCheck(BaseModel):
+    """Response model for health check endpoint."""
+
+    status: str = "OK"
