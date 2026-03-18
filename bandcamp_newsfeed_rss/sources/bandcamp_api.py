@@ -199,6 +199,7 @@ class BandcampAPISource:
 
     async def close(self) -> None:
         """Close the API client."""
+        # TODO: use session_close() after the next release
         if self._client._session:  # noqa: SLF001
             await self._client._session.close()  # noqa: SLF001
 
