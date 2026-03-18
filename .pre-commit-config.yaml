@@ -1,4 +1,9 @@
 repos:
+  - repo: https://codeberg.org/lig/todo-md.git
+    rev: v2.0.3
+    hooks:
+      - id: todo-md
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -12,11 +17,6 @@ repos:
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: trailing-whitespace
-
-  - repo: https://codeberg.org/lig/todo-md.git
-    rev: v2.0.3
-    hooks:
-      - id: todo-md
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.6
