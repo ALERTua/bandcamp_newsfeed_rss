@@ -20,6 +20,7 @@ so you can follow the new releases using your favorite RSS reader
 - Embeds the entry HTML into the RSS entry
 - Configurable caching
 - Health check endpoint for monitoring
+- Optional pre-order filtering (API source only)
 
 
 ## Usage
@@ -33,12 +34,18 @@ so you can follow the new releases using your favorite RSS reader
 
 * Create `.env` file using [.env.example](.env.example)
 ```
-BANDCAMP_USERNAME=my_bandcamp_username
 # "identity" cookie from Bandcamp (required for private feeds)
 IDENTITY=7%09ABCV1A%2B12D12D12ABCDEJbOCvA8Mfi90betEmFcYfhs%3D%09%7B%22id%22%3A135750916%2C%22ex%22%3A0%7D
+
+BANDCAMP_USERNAME=my_bandcamp_username
+
 PORT=8000
 CACHE_DURATION_SECONDS=3600
 TZ=Europe/Kyiv
+
+# Filter out pre-order items from the feed (API source only)
+BANDCAMP_FILTER_PREORDERS=0
+
 VERBOSE=0
 ```
 

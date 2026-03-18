@@ -14,6 +14,8 @@ assert BANDCAMP_USERNAME, "BANDCAMP_USERNAME environment variable not set"
 IDENTITY = os.getenv("IDENTITY")
 assert IDENTITY, "IDENTITY environment variable not set"
 
+BANDCAMP_FILTER_PREORDERS = os.getenv("BANDCAMP_FILTER_PREORDERS", "0") == "1"
+
 # Optional settings with defaults
 VERBOSE = os.getenv("VERBOSE", "0")
 log_level = logging.DEBUG if VERBOSE == "1" else logging.INFO
