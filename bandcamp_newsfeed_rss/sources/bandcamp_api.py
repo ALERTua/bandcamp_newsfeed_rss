@@ -31,15 +31,15 @@ def feed_story_to_html_description(story: FeedStory, pub_date: datetime | None =
 
     # Determine story type label
     story_type_label = {
-        "nr": "an album",
-        "np": "a purchase",
-        "fp": "a featured purchase",
+        "nr": "An album",
+        "np": "A purchase",
+        "fp": "A featured purchase",
     }.get(story.story_type, "a release")
 
     # Build story title section
     story_title = f"""<div class="story-title">
 <div class="story-date">{formatted_date}</div>
-<a class="artist-name" href="{story.band_url}" target="_blank">{story.band_name}</a> {story_type_label}.
+{story_type_label} by <a class="artist-name" href="{story.band_url}" target="_blank">{story.band_name}</a>.
 </div>"""
 
     # Build album art section

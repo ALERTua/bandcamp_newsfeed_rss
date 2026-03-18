@@ -235,7 +235,7 @@ class TestFeedStoryToHtmlDescription:
         result = feed_story_to_html_description(story)
 
         assert isinstance(result, str)
-        assert "an album" in result, "Expected 'an album' in HTML for nr type"
+        assert "An album" in result, "Expected 'an album' in HTML for nr type"
         assert "Test Artist" in result
         assert "Test Album" in result
 
@@ -262,7 +262,7 @@ class TestFeedStoryToHtmlDescription:
         result = feed_story_to_html_description(story)
 
         assert isinstance(result, str)
-        assert "a purchase" in result, "Expected 'a purchase' in HTML for np type"
+        assert "A purchase" in result, "Expected 'a purchase' in HTML for np type"
         assert "Another Artist" in result
 
     def test_html_description_fp_story_type(self):
@@ -287,7 +287,7 @@ class TestFeedStoryToHtmlDescription:
         result = feed_story_to_html_description(story)
 
         assert isinstance(result, str)
-        assert "a featured purchase" in result, "Expected 'a featured purchase' in HTML for fp type"
+        assert "A featured purchase" in result, "Expected 'A featured purchase' in HTML for fp type"
         assert "Featured Artist" in result
 
     def test_html_description_missing_tags(self):
