@@ -130,7 +130,7 @@ class BandcampAPISource:
     @property
     def feed_title(self) -> str:
         """Return the title of the feed."""
-        return f"{self._bandcamp_username} Bandcamp Feed"
+        return f"Bandcamp Feed for {self._bandcamp_username}"
 
     async def fetch_items(self) -> list[FeedItem]:
         """

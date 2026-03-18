@@ -72,7 +72,7 @@ class TestSourceCreation:
         with patch("bandcamp_newsfeed_rss.sources.factory.BANDCAMP_USERNAME", test_username):
             async with get_feed_source(source_type="scraping") as source:
                 # Verify the source has the correct username
-                assert source.bandcamp_username == test_username
+                assert source._bandcamp_username == test_username
 
 
 # =============================================================================

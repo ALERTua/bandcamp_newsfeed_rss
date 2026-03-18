@@ -27,8 +27,8 @@ class BandcampScrapingSource:
         identity_token: str,
         timezone: ZoneInfo,
     ):
-        self.bandcamp_username = bandcamp_username
-        self.identity_token = identity_token
+        self._bandcamp_username = bandcamp_username
+        self._identity_token = identity_token
         self.timezone = timezone
         self._url = f"https://bandcamp.com/{bandcamp_username}/feed"
         self._cookies = {"identity": identity_token}
@@ -40,7 +40,7 @@ class BandcampScrapingSource:
 
     @property
     def feed_title(self) -> str:
-        return f"Bandcamp {self.bandcamp_username} Feed"
+        return f"Bandcamp {self._bandcamp_username} Feed"
 
     async def fetch_items(self) -> list[FeedItem]:
         try:
