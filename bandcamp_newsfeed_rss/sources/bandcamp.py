@@ -9,7 +9,8 @@ from bs4 import BeautifulSoup
 from curl_cffi.requests import AsyncSession
 
 from ..models import FeedItem
-from typing import TYPE_CHECKING, Self
+from .base import FeedSource
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from zoneinfo import ZoneInfo
@@ -18,7 +19,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class BandcampScrapingSource:
+def _process_html(item: BeautifulSoup) -> str:
+    item_copy = BeautifulSoup(str(item), "html.parser")
+
+    remove_elements = [
+        ("div", "tralbum-owners"),
+        ("div", "story-sidebar"),
+        ("div", "tralbum-wrapper-collect-controls"),
+        ("span", "track_play_time"),
+    ]
+
+    for div_type, div_class in remove_elements:
+        element = item_copy.find(div_type, class_=div_class)
+        if element:
+            element.decompose()
+
+    return f'<div class="collection-item-container">{item_copy}</div>'
+
+
+class BandcampScrapingSource(FeedSource):
     """Bandcamp feed source using web scraping."""
 
     def __init__(
@@ -72,12 +91,6 @@ class BandcampScrapingSource:
         """Close the async session."""
         await self._session.close()
 
-    async def __aenter__(self) -> Self:
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self.close()
-
     def _parse_item(self, item: BeautifulSoup) -> FeedItem | None:
         try:
             title_elem = item.find("div", class_="collection-item-title")
@@ -111,7 +124,7 @@ class BandcampScrapingSource:
             pub_date = self._parse_date(release_date)
 
             # Process HTML for description
-            description = self._process_html(item)
+            description = _process_html(item)
 
             return FeedItem(
                 title=f"{title} by {artist}",
@@ -144,20 +157,3 @@ class BandcampScrapingSource:
             return datetime.strptime(release_date, "%b %d, %Y").replace(tzinfo=self.timezone)
         except ValueError:
             return now
-
-    def _process_html(self, item: BeautifulSoup) -> str:
-        item_copy = BeautifulSoup(str(item), "html.parser")
-
-        remove_elements = [
-            ("div", "tralbum-owners"),
-            ("div", "story-sidebar"),
-            ("div", "tralbum-wrapper-collect-controls"),
-            ("span", "track_play_time"),
-        ]
-
-        for div_type, div_class in remove_elements:
-            element = item_copy.find(div_type, class_=div_class)
-            if element:
-                element.decompose()
-
-        return f'<div class="collection-item-container">{item_copy}</div>'

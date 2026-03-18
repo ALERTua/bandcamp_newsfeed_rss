@@ -4,10 +4,11 @@ import logging
 from typing import TYPE_CHECKING
 
 from feedgen.feed import FeedGenerator
-from bandcamp_newsfeed_rss.models import FeedType
+from .models import FeedType
 
 if TYPE_CHECKING:
-    from bandcamp_newsfeed_rss.sources import FeedItem, FeedSource
+    from .models import FeedItem
+    from .sources.base import FeedSource
 
 logger = logging.getLogger(__name__)
 

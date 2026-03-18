@@ -5,7 +5,8 @@ import pytest
 from bandcamp_newsfeed_rss.config import BANDCAMP_USERNAME, IDENTITY, TIMEZONE
 from bandcamp_newsfeed_rss.rss import RSSGenerator
 from bandcamp_newsfeed_rss.models import FeedType, SourceType
-from bandcamp_newsfeed_rss.sources import BandcampScrapingSource, BandcampAPISource
+from bandcamp_newsfeed_rss.sources.bandcamp import BandcampScrapingSource
+from bandcamp_newsfeed_rss.sources.bandcamp_api import BandcampAPISource
 from bandcamp_newsfeed_rss.sources.factory import get_feed_source
 
 

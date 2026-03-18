@@ -3,13 +3,13 @@
 import logging
 from datetime import datetime
 from email.utils import parsedate_to_datetime
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING
 
 from bandcamp_async_api import BandcampAPIClient, FeedStory
 
 from ..models import FeedItem
 from ..config import BANDCAMP_FILTER_PREORDERS
-
+from .base import FeedSource
 
 if TYPE_CHECKING:
     from zoneinfo import ZoneInfo
@@ -97,7 +97,7 @@ def feed_story_to_html_description(story: FeedStory, pub_date: datetime | None =
 </div>"""
 
 
-class BandcampAPISource:
+class BandcampAPISource(FeedSource):
     """Bandcamp feed source using the official Bandcamp API."""
 
     def __init__(
@@ -203,14 +203,8 @@ class BandcampAPISource:
             tags=tags,
         )
 
+    # noinspection PyProtectedMember
     async def close(self) -> None:
         """Close the API client."""
-        # TODO: use session_close() after the next release
-        if self._client._session:  # noqa: SLF001
+        if not self._client._session_overridden and self._client._session:  # noqa: SLF001
             await self._client._session.close()  # noqa: SLF001
-
-    async def __aenter__(self) -> Self:
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self.close()
