@@ -181,6 +181,10 @@ class BandcampAPISource:
         pub_date = self._parse_datetime(story.story_date)
         description = feed_story_to_html_description(story, pub_date=pub_date)
         title = f"{story.item_title} by {story.band_name}"
+        tags = []
+        if story.tags:
+            tags = [_.get("name", "") for _ in story.tags]
+            tags = [_ for _ in tags if _]
 
         return FeedItem(
             title=title,
@@ -190,6 +194,7 @@ class BandcampAPISource:
             pub_date=pub_date,
             guid=story.item_url,
             enclosure_url=story.item_art_url,
+            tags=tags,
         )
 
     async def close(self) -> None:

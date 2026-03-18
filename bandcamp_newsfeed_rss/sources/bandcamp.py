@@ -85,6 +85,7 @@ class BandcampScrapingSource:
             album_link_elem = item.find("a", class_="item-link")
             cover_image_elem = item.find("img", class_="tralbum-art-large")
             release_date_elem = item.find("div", class_="story-date")
+            tags_elem = item.find("div", class_="collection-item-tags")
 
             if not all([title_elem, artist_elem, album_link_elem, cover_image_elem, release_date_elem]):
                 return None
@@ -94,6 +95,13 @@ class BandcampScrapingSource:
             album_link = album_link_elem["href"]
             cover_image = cover_image_elem["src"]
             release_date = release_date_elem.text.strip().lower()
+
+            tags = []
+            if tags_elem:
+                for a_tag in tags_elem.find_all("a"):
+                    tag_text = a_tag.text.strip()
+                    if tag_text:
+                        tags.append(tag_text)
 
             # Clean album_link
             parsed = urlparse(album_link)
@@ -113,6 +121,7 @@ class BandcampScrapingSource:
                 pub_date=pub_date,
                 guid=album_link,
                 enclosure_url=cover_image,
+                tags=tags,
             )
         except AttributeError, TypeError:
             return None

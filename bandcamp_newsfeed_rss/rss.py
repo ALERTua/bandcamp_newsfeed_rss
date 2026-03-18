@@ -54,6 +54,8 @@ class RSSGenerator:
         entry.author({"name": item.author})
         entry.description(item.description)
         entry.pubDate(item.pub_date)
+        for tag in item.tags:
+            entry.category(term=tag)
 
         if item.enclosure_url:
             entry.enclosure(url=item.enclosure_url, type=item.enclosure_type)
