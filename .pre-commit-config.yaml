@@ -13,6 +13,11 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
 
+  - repo: https://codeberg.org/lig/todo-md.git
+    rev: v2.0.3
+    hooks:
+      - id: todo-md
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.6
     hooks:
@@ -35,11 +40,6 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-
-  - repo: https://codeberg.org/lig/todo-md.git
-    rev: v2.0.3
-    hooks:
-      - id: todo-md
 
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.25
