@@ -151,7 +151,7 @@ class BandcampAPISource:
 
         stories = feed_response.stories[::-1]
         if BANDCAMP_FILTER_PREORDERS:
-            feed_response.stories = [_ for _ in stories if not _.is_preorder]
+            stories = [_ for _ in stories if not _.is_preorder]
 
         feed_items = [self._feed_story_to_feed_item(_) for _ in stories]
 
