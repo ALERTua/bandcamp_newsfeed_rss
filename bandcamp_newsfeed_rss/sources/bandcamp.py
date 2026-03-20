@@ -153,6 +153,9 @@ class BandcampScrapingSource(FeedSource):
         if release_date == "yesterday":
             return now - timedelta(days=1)
 
+        if release_date == "today":
+            return now
+
         try:  # 'jan 28, 2026'
             return datetime.strptime(release_date, "%b %d, %Y").replace(tzinfo=self.timezone)
         except ValueError:
