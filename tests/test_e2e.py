@@ -45,7 +45,9 @@ async def test_feed(source_type: str, feed_type: str) -> None:
         match feed_type:
             case "rss":
                 assert "<rss" in feed_str.lower(), f"{source_type.capitalize()} source feed is not valid RSS"
-                assert "<channel>" in feed_str.lower(), f"{source_type.capitalize()} source feed missing channel element"
+                assert "<channel>" in feed_str.lower(), (
+                    f"{source_type.capitalize()} source feed missing channel element"
+                )
                 assert "<item>" in feed_str.lower(), f"{source_type.capitalize()} source feed has no items"
             case "atom":
                 assert "<feed" in feed_str.lower(), f"{source_type.capitalize()} source feed is not valid Atom"
