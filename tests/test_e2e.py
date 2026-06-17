@@ -42,9 +42,14 @@ async def test_feed(source_type: str, feed_type: str) -> None:
         feed = await generator.generate()
         assert len(feed) > 0, f"{source_type.capitalize()} source RSS feed is empty"
         feed_str = feed.decode("utf-8")
-        assert "<rss" in feed_str.lower(), f"{source_type.capitalize()} source feed is not valid RSS"
-        assert "<channel>" in feed_str.lower(), f"{source_type.capitalize()} source feed missing channel element"
-        assert "<item>" in feed_str.lower(), f"{source_type.capitalize()} source feed has no items"
+        match feed_type:
+            case "rss":
+                assert "<rss" in feed_str.lower(), f"{source_type.capitalize()} source feed is not valid RSS"
+                assert "<channel>" in feed_str.lower(), f"{source_type.capitalize()} source feed missing channel element"
+                assert "<item>" in feed_str.lower(), f"{source_type.capitalize()} source feed has no items"
+            case "atom":
+                assert "<feed" in feed_str.lower(), f"{source_type.capitalize()} source feed is not valid Atom"
+                assert "<entry>" in feed_str.lower(), f"{source_type.capitalize()} source feed has no entries"
 
         # Verify tags/categories are included in feed entries if available
         items = await source.fetch_items()
