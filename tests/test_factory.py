@@ -36,7 +36,7 @@ class TestSourceCreation:
     def test_invalid_source_type_raises_http_exception(self):
         """Unknown source_type raises HTTPException with status 400."""
         # Attempting to get a source with invalid type should raise HTTPException
-        with pytest.raises(HTTPException) as exc_info:  # noqa: PT012
+        with pytest.raises(HTTPException) as exc_info:
 
             async def test_invalid():
                 async with get_feed_source(source_type="invalid_type"):
@@ -131,7 +131,7 @@ class TestErrorHandling:
     def test_invalid_source_type_error_message_contains_available_types(self):
         """HTTPException error message contains available source types."""
         # This is a sync test - test that invalid source type raises correct error
-        with pytest.raises(HTTPException) as exc_info:  # noqa: PT012
+        with pytest.raises(HTTPException) as exc_info:
             # Directly test the factory function behavior
             # The factory will raise before yielding, so we test the exception
             async def test_invalid():

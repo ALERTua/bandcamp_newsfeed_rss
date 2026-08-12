@@ -206,5 +206,5 @@ class BandcampAPISource(FeedSource):
     # noinspection PyProtectedMember
     async def close(self) -> None:
         """Close the API client."""
-        if not self._client._session_overridden and self._client._session:  # noqa: SLF001
-            await self._client._session.close()  # noqa: SLF001
+        if not self._client._session_overridden and self._client._session:
+            await self._client._session.close()

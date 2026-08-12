@@ -120,7 +120,7 @@ def sample_feed_item_minimal() -> FeedItem:
 
 @pytest.fixture(scope="session")
 def sample_api_response_full() -> dict:
-    """Valid JSON response with all fields, 3 story objects."""  # noqa: D401
+    """Valid JSON response with all fields, 3 story objects."""
     return {
         "stories": [
             {
@@ -212,7 +212,7 @@ def sample_api_response_full() -> dict:
 
 @pytest.fixture(scope="session")
 def sample_api_response_minimal() -> dict:
-    """Valid JSON with only required fields, 1 story."""  # noqa: D401
+    """Valid JSON with only required fields, 1 story."""
     return {
         "stories": [
             {
@@ -235,7 +235,7 @@ def sample_api_response_minimal() -> dict:
 
 @pytest.fixture(scope="session")
 def sample_api_response_empty_stories() -> dict:
-    """Valid JSON with stories: [] (empty array)."""  # noqa: D401
+    """Valid JSON with stories: [] (empty array)."""
     return {"stories": []}
 
 
@@ -399,7 +399,7 @@ def sample_html_feed_page() -> str:
     </ul>
 </div>
 </body>
-</html>"""  # noqa: E501
+</html>"""
 
 
 @pytest.fixture(scope="session")
@@ -434,7 +434,7 @@ def sample_html_feed_minimal() -> str:
 
 @pytest.fixture(scope="session")
 def sample_html_no_feed_container() -> str:
-    """Valid HTML but missing .feed-container."""  # noqa: D401
+    """Valid HTML but missing .feed-container."""
     return """<!DOCTYPE html>
 <html>
 <head><title>Bandcamp Feed</title></head>
