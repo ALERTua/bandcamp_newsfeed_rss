@@ -14,9 +14,6 @@ exclude = [
 ]
 
 [lint]
-select = [
-    "ALL",
-]
 ignore = [
     "UP031", # percent
     "G002", # percent
