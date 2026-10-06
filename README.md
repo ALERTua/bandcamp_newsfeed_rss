@@ -131,6 +131,14 @@ docker run -p 8000:8000 \
   ghcr.io/alertua/bandcamp_newsfeed_rss
 ```
 
+Image tags on `ghcr.io/alertua/bandcamp_newsfeed_rss`:
+
+| Tag | What it is |
+|---|---|
+| `latest` | The newest release. A run without a tag uses it. |
+| `0.1`, `0.1.2` | A release line or one exact release. `0.1` gets each new `0.1.x` release. |
+| `edge` | The newest commit of `main`. It can break at any time. |
+
 ## Troubleshooting
 
 **Feed not loading?**
