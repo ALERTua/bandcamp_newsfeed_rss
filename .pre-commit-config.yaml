@@ -14,7 +14,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.2
+    rev: v0.16.10
     hooks:
       # Run the linter.
       - id: ruff
@@ -23,7 +23,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.3
+    rev: 0.12.23
     hooks:
       - id: uv-lock
 
@@ -37,7 +37,7 @@ repos:
         always_run: true
 
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.25
+    rev: '0.26'
     hooks:
       - id: validate-pyproject
         # Optional extra validations from SchemaStore:
